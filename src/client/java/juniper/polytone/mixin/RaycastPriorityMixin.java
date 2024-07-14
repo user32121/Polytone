@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import juniper.polytone.Polytone;
 import juniper.polytone.command.RaycastTarget;
 import juniper.polytone.init.PolytoneCommand;
 import net.minecraft.entity.Entity;
@@ -34,7 +33,6 @@ public class RaycastPriorityMixin {
         Entity curEntity = null;
         Vec3d curPos = null;
         int curPriority = 0;
-        Polytone.LOGGER.info("spacer----------------------------------------------------");
         for (Entity entity : world.getOtherEntities(source, box, predicate)) {
             Box box2 = entity.getBoundingBox().expand(entity.getTargetingMargin());
             //actual raycast check
@@ -61,12 +59,9 @@ public class RaycastPriorityMixin {
             //check if hit is closer or has higher priority
             Vec3d pos = optional.get();
             double dist = min.squaredDistanceTo(pos);
-            Polytone.LOGGER.info(String.format("%s: %s, %s", entity, priority, dist));
             if (!((dist < curDist && priority == curPriority) || priority > curPriority) && curDist != 0.0) {
-                Polytone.LOGGER.info("fail");
                 continue;
             }
-            Polytone.LOGGER.info("success");
             //hitting entity riding same thing/hitting vehicle?
             if (entity.getRootVehicle() == source.getRootVehicle()) {
                 if (curDist != 0.0)
@@ -83,7 +78,8 @@ public class RaycastPriorityMixin {
         }
         if (curEntity == null) {
             info.setReturnValue(null);
+        } else {
+            info.setReturnValue(new EntityHitResult(curEntity, curPos));
         }
-        info.setReturnValue(new EntityHitResult(curEntity, curPos));
     }
 }
