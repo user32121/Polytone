@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "polytone",
+  "version": "${version}",
+  "name": "Polytone",
+  "description": "A Multipurpose tool. May be inspired by Baritone.",
+  "authors": ["Juniper"],
+  "contact": {
+    "sources": "https://github.com/user32121/Polytone"
+  },
+  "license": "GPLv3",
+  "icon": "assets/polytone/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": ["juniper.polytone.Polytone"]
+  },
+  "mixins": [
+    {
+      "config": "polytone.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": "~1.20.6",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

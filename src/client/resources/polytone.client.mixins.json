@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "juniper.polytone.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["RaycastPriorityMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
