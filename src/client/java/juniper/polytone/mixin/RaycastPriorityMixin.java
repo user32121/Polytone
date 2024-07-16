@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import juniper.polytone.command.RaycastTarget;
-import juniper.polytone.init.PolytoneCommand;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Shearable;
 import net.minecraft.entity.player.PlayerEntity;
@@ -40,7 +39,7 @@ public class RaycastPriorityMixin {
             //check priorities
             int priority = 0;
             if (entity instanceof Shearable s) {
-                priority += PolytoneCommand.raycastPriority.getOrDefault(RaycastTarget.CAN_SHEAR, false) && s.isShearable() ? 1 : 0;
+                priority += RaycastTarget.raycastPriority.getOrDefault(RaycastTarget.CAN_SHEAR, false) && s.isShearable() ? 1 : 0;
             }
             //hitting from inside entity
             if (box2.contains(min)) {

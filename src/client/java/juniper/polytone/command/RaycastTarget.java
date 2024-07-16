@@ -1,6 +1,8 @@
 package juniper.polytone.command;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import com.mojang.brigadier.StringReader;
@@ -35,4 +37,6 @@ public enum RaycastTarget {
             return CommandSource.suggestMatching(Arrays.stream(values()).map(Object::toString).map(String::toLowerCase), builder);
         }
     }
+
+    public static final Map<RaycastTarget, Boolean> raycastPriority = new HashMap<>();
 }
