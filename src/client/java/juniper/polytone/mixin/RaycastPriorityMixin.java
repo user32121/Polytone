@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import juniper.polytone.command.RaycastTarget;
 import juniper.polytone.init.PolytoneCommand;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.entity.Shearable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.util.hit.EntityHitResult;
@@ -39,8 +39,8 @@ public class RaycastPriorityMixin {
             Optional<Vec3d> optional = box2.raycast(min, max);
             //check priorities
             int priority = 0;
-            if (entity instanceof SheepEntity se) {
-                priority += PolytoneCommand.raycastPriority.getOrDefault(RaycastTarget.CAN_SHEAR, false) && se.isShearable() ? 1 : 0;
+            if (entity instanceof Shearable s) {
+                priority += PolytoneCommand.raycastPriority.getOrDefault(RaycastTarget.CAN_SHEAR, false) && s.isShearable() ? 1 : 0;
             }
             //hitting from inside entity
             if (box2.contains(min)) {

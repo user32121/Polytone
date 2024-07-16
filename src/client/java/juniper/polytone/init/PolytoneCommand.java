@@ -31,12 +31,9 @@ public class PolytoneCommand {
             context.getSource().sendFeedback(Text.literal(String.format("Raycast priority for %s set to %s", target, b)));
             return 1;
         }))));
+
         // /view canBreed enable/disable
-        makeCommand("view", node -> node.executes(context -> {
-            //TODO
-            context.getSource().sendError(Text.literal("Not implemented"));
-            return -1;
-        }));
+        //probably fits better in Monotone
     }
 
     private static void makeCommand(String command, Function<LiteralArgumentBuilder<FabricClientCommandSource>, LiteralArgumentBuilder<FabricClientCommandSource>> buildCommand) {
