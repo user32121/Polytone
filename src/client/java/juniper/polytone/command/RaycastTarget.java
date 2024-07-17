@@ -17,7 +17,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 
 public enum RaycastTarget {
-    CAN_BREED, CAN_SHEAR;
+    CAN_SHEAR, CAN_FEED;
 
     public static class RaycastTargetArgument implements ArgumentType<RaycastTarget> {
         private static final DynamicCommandExceptionType EXCEPTION_TYPE = new DynamicCommandExceptionType(target -> Text.literal("Unknown target: " + target));

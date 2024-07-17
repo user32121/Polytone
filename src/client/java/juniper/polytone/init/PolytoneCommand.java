@@ -28,7 +28,7 @@ public class PolytoneCommand {
             return 1;
         }))));
 
-        // /view canBreed enable/disable
+        // /view canFeed enable/disable
         //probably fits better in Monotone
     }
 
