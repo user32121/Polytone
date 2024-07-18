@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import juniper.polytone.command.RaycastTarget;
+import juniper.polytone.mixinInterfaces.FeedingInterface;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Shearable;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,7 +20,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 @Mixin(ProjectileUtil.class)
-public class RaycastPriorityMixin {
+public abstract class RaycastPriorityMixin {
     @Inject(method = "raycast", at = @At("HEAD"), cancellable = true)
     private static void raycast(Entity source, Vec3d min, Vec3d max, Box box, Predicate<Entity> predicate, double maxDistance, CallbackInfoReturnable<EntityHitResult> info) {
         //should only trigger when player is doing cursor raycast
@@ -37,9 +38,14 @@ public class RaycastPriorityMixin {
             //actual raycast check
             Optional<Vec3d> optional = box2.raycast(min, max);
             //check priorities
+            //TODO raycast ordering messed up even when all options disabled
             int priority = 0;
             if (entity instanceof Shearable s) {
                 priority += RaycastTarget.raycastPriority.getOrDefault(RaycastTarget.CAN_SHEAR, false) && s.isShearable() ? 1 : 0;
+            }
+            if ((Object) entity instanceof FeedingInterface aea) {
+                //3 files just for this, that's right
+                priority += entity.getWorld().getTime() - aea.getLastFed() >= AnimalEntityAccessor.getBREEDING_COOLDOWN() ? 1 : 0;
             }
             //hitting from inside entity
             if (box2.contains(min)) {
