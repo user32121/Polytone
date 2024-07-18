@@ -12,6 +12,7 @@ import juniper.polytone.command.RaycastTarget;
 import juniper.polytone.mixinInterfaces.FeedingInterface;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Shearable;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.util.hit.EntityHitResult;
@@ -40,12 +41,13 @@ public abstract class RaycastPriorityMixin {
             //check priorities
             //TODO raycast ordering messed up even when all options disabled
             int priority = 0;
-            if (entity instanceof Shearable s) {
-                priority += RaycastTarget.raycastPriority.getOrDefault(RaycastTarget.CAN_SHEAR, false) && s.isShearable() ? 1 : 0;
+            if (entity instanceof Shearable s && RaycastTarget.raycastPriority.getOrDefault(RaycastTarget.CAN_SHEAR, false) && s.isShearable()) {
+                priority += 1;
             }
-            if ((Object) entity instanceof FeedingInterface aea) {
+            if ((Object) entity instanceof FeedingInterface aea && RaycastTarget.raycastPriority.getOrDefault(RaycastTarget.CAN_FEED, false) && !((AnimalEntity) entity).isBaby()
+                    && entity.getWorld().getTime() - aea.getLastFed() >= AnimalEntityAccessor.getBREEDING_COOLDOWN()) {
                 //3 files just for this, that's right
-                priority += entity.getWorld().getTime() - aea.getLastFed() >= AnimalEntityAccessor.getBREEDING_COOLDOWN() ? 1 : 0;
+                priority += 1;
             }
             //hitting from inside entity
             if (box2.contains(min)) {

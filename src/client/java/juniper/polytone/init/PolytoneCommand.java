@@ -27,9 +27,6 @@ public class PolytoneCommand {
             context.getSource().sendFeedback(Text.literal(String.format("Raycast priority for %s set to %s", target, b)));
             return 1;
         }))));
-
-        // /view canFeed enable/disable
-        //probably fits better in Monotone
     }
 
     private static void makeCommand(String command, Function<LiteralArgumentBuilder<FabricClientCommandSource>, LiteralArgumentBuilder<FabricClientCommandSource>> buildCommand) {
