@@ -39,7 +39,6 @@ public abstract class RaycastPriorityMixin {
             //actual raycast check
             Optional<Vec3d> optional = box2.raycast(min, max);
             //check priorities
-            //TODO raycast ordering messed up even when all options disabled
             int priority = 0;
             if (entity instanceof Shearable s && RaycastTarget.raycastPriority.getOrDefault(RaycastTarget.CAN_SHEAR, false) && s.isShearable()) {
                 priority += 1;
