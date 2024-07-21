@@ -46,18 +46,18 @@ public enum RaycastTarget {
     public static final RequiredArgumentBuilder<FabricClientCommandSource, RaycastTarget> TARGET_ARG = ClientCommandManager.argument("target", new RaycastTargetArgument());
     public static final RequiredArgumentBuilder<FabricClientCommandSource, Boolean> VALUE_ARG = ClientCommandManager.argument("value", BoolArgumentType.bool());
 
-    public static int getTarget(CommandContext<FabricClientCommandSource> context) {
-        RaycastTarget target = context.getArgument(TARGET_ARG.getName(), RaycastTarget.class);
+    public static int getTarget(CommandContext<FabricClientCommandSource> ctx) {
+        RaycastTarget target = ctx.getArgument(TARGET_ARG.getName(), RaycastTarget.class);
         boolean b = RaycastTarget.raycastPriority.getOrDefault(target, false);
-        context.getSource().sendFeedback(Text.literal(String.format("Raycast priority for %s is %s", target, b)));
+        ctx.getSource().sendFeedback(Text.literal(String.format("Raycast priority for %s is %s", target, b)));
         return 1;
     }
 
-    public static int setTarget(CommandContext<FabricClientCommandSource> context) {
-        RaycastTarget target = context.getArgument(TARGET_ARG.getName(), RaycastTarget.class);
-        boolean b = BoolArgumentType.getBool(context, VALUE_ARG.getName());
+    public static int setTarget(CommandContext<FabricClientCommandSource> ctx) {
+        RaycastTarget target = ctx.getArgument(TARGET_ARG.getName(), RaycastTarget.class);
+        boolean b = BoolArgumentType.getBool(ctx, VALUE_ARG.getName());
         RaycastTarget.raycastPriority.put(target, b);
-        context.getSource().sendFeedback(Text.literal(String.format("Raycast priority for %s set to %s", target, b)));
+        ctx.getSource().sendFeedback(Text.literal(String.format("Raycast priority for %s set to %s", target, b)));
         return 1;
     }
 }

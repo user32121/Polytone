@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import juniper.polytone.mixinInterfaces.FeedingInterface;
+import juniper.polytone.mixinInterface.FeedingInterface;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.passive.AnimalEntity;
 
