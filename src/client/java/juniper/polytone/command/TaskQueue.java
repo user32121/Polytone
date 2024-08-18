@@ -1,10 +1,14 @@
 package juniper.polytone.command;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.function.Function;
 
-import com.mojang.brigadier.arguments.FloatArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
@@ -17,24 +21,55 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 public class TaskQueue {
-    public static final RequiredArgumentBuilder<FabricClientCommandSource, Float> DEGREES_ARG = ClientCommandManager.argument("degrees", FloatArgumentType.floatArg());
-    public static final RequiredArgumentBuilder<FabricClientCommandSource, Integer> TICKS_ARG = ClientCommandManager.argument("ticks", IntegerArgumentType.integer());
     private static final Queue<Task> taskQueue = new LinkedList<>();
     private static Task curTask = null;
     private static boolean runningTasks = false;
 
-    public static int addSpinTask(CommandContext<FabricClientCommandSource> ctx) {
-        float rotation = FloatArgumentType.getFloat(ctx, DEGREES_ARG.getName());
-        taskQueue.add(new SpinTask(rotation));
-        ctx.getSource().sendFeedback(Text.literal(String.format("Added spin task for %s degrees", rotation)));
-        return 1;
+    public static record TaskInfo(String name, Text description, Collection<RequiredArgumentBuilder<FabricClientCommandSource, ?>> args,
+            Function<CommandContext<FabricClientCommandSource>, Task> makeTask) {
     }
 
-    public static int addWaitTask(CommandContext<FabricClientCommandSource> ctx) {
-        int delay = IntegerArgumentType.getInteger(ctx, TICKS_ARG.getName());
-        taskQueue.add(new WaitTask(delay));
-        ctx.getSource().sendFeedback(Text.literal(String.format("Added wait task for %s ticks", delay)));
-        return 1;
+    private static List<TaskInfo> tasks = new ArrayList<>();
+    static {
+        tasks.add(new TaskInfo("spin", SpinTask.DESCRIPTION, SpinTask.ARGS, SpinTask::makeTask));
+        tasks.add(new TaskInfo("wait", WaitTask.DESCRIPTION, WaitTask.ARGS, WaitTask::makeTask));
+    }
+
+    public static LiteralArgumentBuilder<FabricClientCommandSource> makeInfoCommand() {
+        LiteralArgumentBuilder<FabricClientCommandSource> node = ClientCommandManager.literal("info");
+        for (TaskInfo info : tasks) {
+            node = node.then(ClientCommandManager.literal(info.name).executes(ctx -> {
+                ctx.getSource().sendFeedback(info.description);
+                return 1;
+            }));
+        }
+        return node;
+    }
+
+    public static LiteralArgumentBuilder<FabricClientCommandSource> makeAddCommand() {
+        LiteralArgumentBuilder<FabricClientCommandSource> node = ClientCommandManager.literal("add");
+        for (TaskInfo info : tasks) {
+            Command<FabricClientCommandSource> cmd = ctx -> {
+                Task task = info.makeTask.apply(ctx);
+                TaskQueue.taskQueue.add(task);
+                ctx.getSource().sendFeedback(Text.literal(String.format("Added %s", task)));
+                return 1;
+            };
+            RequiredArgumentBuilder<FabricClientCommandSource, ?> argNode = null;
+            for (RequiredArgumentBuilder<FabricClientCommandSource, ?> arg : info.args) {
+                if (argNode == null) {
+                    argNode = arg.executes(cmd);
+                } else {
+                    argNode = arg.then(argNode);
+                }
+            }
+            if (argNode == null) {
+                node = node.then(ClientCommandManager.literal(info.name).executes(cmd));
+            } else {
+                node = node.then(ClientCommandManager.literal(info.name).then(argNode));
+            }
+        }
+        return node;
     }
 
     public static int startTasks(CommandContext<FabricClientCommandSource> ctx) {

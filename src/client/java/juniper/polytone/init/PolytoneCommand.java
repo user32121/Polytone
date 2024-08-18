@@ -6,7 +6,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
 import juniper.polytone.Polytone;
 import juniper.polytone.command.RaycastTarget;
-import juniper.polytone.command.TaskInfo;
 import juniper.polytone.command.TaskQueue;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -18,10 +17,7 @@ public class PolytoneCommand {
         makeCommand("tasks",
                 node -> node.then(ClientCommandManager.literal("start").executes(TaskQueue::startTasks)).then(ClientCommandManager.literal("stop").executes(TaskQueue::stopTasks))
                         .then(ClientCommandManager.literal("skip").executes(TaskQueue::skipTask)).then(ClientCommandManager.literal("clear").executes(TaskQueue::clearTasks))
-                        .then(ClientCommandManager.literal("info").then(ClientCommandManager.literal("spin").executes(TaskInfo::spinInfo))
-                                .then(ClientCommandManager.literal("wait").executes(TaskInfo::waitInfo)))
-                        .then(ClientCommandManager.literal("add").then(ClientCommandManager.literal("spin").then(TaskQueue.DEGREES_ARG.executes(TaskQueue::addSpinTask)))
-                                .then(ClientCommandManager.literal("wait").then(TaskQueue.TICKS_ARG.executes(TaskQueue::addWaitTask)))));
+                        .then(TaskQueue.makeInfoCommand()).then(TaskQueue.makeAddCommand()));
     }
 
     private static void makeCommand(String command, Function<LiteralArgumentBuilder<FabricClientCommandSource>, LiteralArgumentBuilder<FabricClientCommandSource>> buildCommand) {
