@@ -14,11 +14,10 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class PolytoneCommand {
     public static void init() {
-        makeCommand("raycast_priority",
-                node -> node.then(RaycastTarget.TARGET_ARG.executes(RaycastTarget::getTarget).then(RaycastTarget.VALUE_ARG.executes(RaycastTarget::setTarget))));
+        makeCommand("raycast_priority", node -> node.then(RaycastTarget.TARGET_ARG.executes(RaycastTarget::getTarget).then(RaycastTarget.VALUE_ARG.executes(RaycastTarget::setTarget))));
         makeCommand("tasks",
                 node -> node.then(ClientCommandManager.literal("start").executes(TaskQueue::startTasks)).then(ClientCommandManager.literal("stop").executes(TaskQueue::stopTasks))
-                        .then(ClientCommandManager.literal("skip").executes(TaskQueue::skipTask))
+                        .then(ClientCommandManager.literal("skip").executes(TaskQueue::skipTask)).then(ClientCommandManager.literal("clear").executes(TaskQueue::clearTasks))
                         .then(ClientCommandManager.literal("info").then(ClientCommandManager.literal("spin").executes(TaskInfo::spinInfo))
                                 .then(ClientCommandManager.literal("wait").executes(TaskInfo::waitInfo)))
                         .then(ClientCommandManager.literal("add").then(ClientCommandManager.literal("spin").then(TaskQueue.DEGREES_ARG.executes(TaskQueue::addSpinTask)))
@@ -26,7 +25,6 @@ public class PolytoneCommand {
     }
 
     private static void makeCommand(String command, Function<LiteralArgumentBuilder<FabricClientCommandSource>, LiteralArgumentBuilder<FabricClientCommandSource>> buildCommand) {
-        ClientCommandRegistrationCallback.EVENT
-                .register((dispatcher, registry) -> dispatcher.register(buildCommand.apply(ClientCommandManager.literal(Polytone.MODID + ":" + command))));
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registry) -> dispatcher.register(buildCommand.apply(ClientCommandManager.literal(Polytone.MODID + ":" + command))));
     }
 }

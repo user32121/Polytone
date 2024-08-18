@@ -49,11 +49,17 @@ public class TaskQueue {
         return 1;
     }
 
+    public static int clearTasks(CommandContext<FabricClientCommandSource> ctx) {
+        skipTask(ctx);
+        ctx.getSource().sendFeedback(Text.literal(String.format("Cleared tasks (%s in queue)", taskQueue.size())));
+        taskQueue.clear();
+        return 1;
+    }
+
     @SuppressWarnings("resource")
     public static void stopTasks() {
         runningTasks = false;
-        MinecraftClient.getInstance().inGameHud.getChatHud()
-                .addMessage(Text.literal(String.format("Stopped tasks (%s unfinished and %s in queue)", curTask == null ? 0 : 1, taskQueue.size())));
+        MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.literal(String.format("Stopped tasks (%s unfinished and %s in queue)", curTask == null ? 0 : 1, taskQueue.size())));
     }
 
     public static int skipTask(CommandContext<FabricClientCommandSource> ctx) {
