@@ -11,6 +11,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
+import juniper.polytone.task.NavigateTask.NavigateTaskFactory;
 import juniper.polytone.task.SpinTask.SpinTaskFactory;
 import juniper.polytone.task.Task;
 import juniper.polytone.task.Task.TaskFactory;
@@ -29,6 +30,7 @@ public class TaskQueue {
     static {
         taskFactories.add(new SpinTaskFactory());
         taskFactories.add(new WaitTaskFactory());
+        taskFactories.add(new NavigateTaskFactory());
     }
 
     public static LiteralArgumentBuilder<FabricClientCommandSource> makeInfoCommand() {
