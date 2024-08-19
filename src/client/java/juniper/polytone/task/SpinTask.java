@@ -13,15 +13,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 
 public class SpinTask implements Task {
-    public static final Text DESCRIPTION = Text.literal("Spin a certain amount of degrees");
-    public static final RequiredArgumentBuilder<FabricClientCommandSource, Float> DEGREES_ARG = ClientCommandManager.argument("degrees", FloatArgumentType.floatArg());
-    public static final List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> ARGS = List.of(DEGREES_ARG);
-
-    public static Task makeTask(CommandContext<FabricClientCommandSource> ctx) {
-        float rotation = FloatArgumentType.getFloat(ctx, DEGREES_ARG.getName());
-        return new SpinTask(rotation);
-    }
-
     private float rotation;
 
     public SpinTask(float rotation) {
@@ -41,5 +32,31 @@ public class SpinTask implements Task {
         rotation -= yaw2 - yaw;
         //finish when rotation changes sign
         return move != MathHelper.sign(rotation);
+    }
+
+    public static class SpinTaskFactory implements TaskFactory<SpinTask> {
+        public static final RequiredArgumentBuilder<FabricClientCommandSource, Float> DEGREES_ARG = ClientCommandManager.argument("degrees", FloatArgumentType.floatArg());
+
+        @Override
+        public String getTaskName() {
+            return "spin";
+        }
+
+        @Override
+        public Text getDescription() {
+            return Text.literal("Spin a certain amount of degrees");
+        }
+
+        @Override
+        public List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
+            return List.of(DEGREES_ARG);
+        }
+
+        @Override
+        public SpinTask makeTask(CommandContext<FabricClientCommandSource> ctx) {
+            float rotation = FloatArgumentType.getFloat(ctx, DEGREES_ARG.getName());
+            return new SpinTask(rotation);
+        }
+
     }
 }

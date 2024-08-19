@@ -12,15 +12,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 public class WaitTask implements Task {
-    public static final Text DESCRIPTION = Text.literal("Wait a number of ticks");
-    public static final RequiredArgumentBuilder<FabricClientCommandSource, Integer> TICKS_ARG = ClientCommandManager.argument("ticks", IntegerArgumentType.integer());
-    public static final List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> ARGS = List.of(TICKS_ARG);
-
-    public static Task makeTask(CommandContext<FabricClientCommandSource> ctx) {
-        int delay = IntegerArgumentType.getInteger(ctx, TICKS_ARG.getName());
-        return new WaitTask(delay);
-    }
-
     private int ticksLeft;
 
     public WaitTask(int delay) {
@@ -35,5 +26,30 @@ public class WaitTask implements Task {
     public boolean tick(MinecraftClient client) {
         --ticksLeft;
         return ticksLeft <= 0;
+    }
+
+    public static class WaitTaskFactory implements TaskFactory<WaitTask> {
+        public static final RequiredArgumentBuilder<FabricClientCommandSource, Integer> TICKS_ARG = ClientCommandManager.argument("ticks", IntegerArgumentType.integer());
+
+        @Override
+        public String getTaskName() {
+            return "wait";
+        }
+
+        @Override
+        public Text getDescription() {
+            return Text.literal("Wait a number of ticks");
+        }
+
+        @Override
+        public List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
+            return List.of(TICKS_ARG);
+        }
+
+        @Override
+        public WaitTask makeTask(CommandContext<FabricClientCommandSource> ctx) {
+            int delay = IntegerArgumentType.getInteger(ctx, TICKS_ARG.getName());
+            return new WaitTask(delay);
+        }
     }
 }

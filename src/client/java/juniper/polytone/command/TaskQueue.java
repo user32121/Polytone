@@ -1,20 +1,20 @@
 package juniper.polytone.command;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.function.Function;
 
+import com.google.common.collect.Lists;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
-import juniper.polytone.task.SpinTask;
+import juniper.polytone.task.SpinTask.SpinTaskFactory;
 import juniper.polytone.task.Task;
-import juniper.polytone.task.WaitTask;
+import juniper.polytone.task.Task.TaskFactory;
+import juniper.polytone.task.WaitTask.WaitTaskFactory;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -25,21 +25,17 @@ public class TaskQueue {
     private static Task curTask = null;
     private static boolean runningTasks = false;
 
-    public static record TaskInfo(String name, Text description, Collection<RequiredArgumentBuilder<FabricClientCommandSource, ?>> args,
-            Function<CommandContext<FabricClientCommandSource>, Task> makeTask) {
-    }
-
-    private static List<TaskInfo> tasks = new ArrayList<>();
+    private static List<TaskFactory<?>> taskFactories = new ArrayList<>();
     static {
-        tasks.add(new TaskInfo("spin", SpinTask.DESCRIPTION, SpinTask.ARGS, SpinTask::makeTask));
-        tasks.add(new TaskInfo("wait", WaitTask.DESCRIPTION, WaitTask.ARGS, WaitTask::makeTask));
+        taskFactories.add(new SpinTaskFactory());
+        taskFactories.add(new WaitTaskFactory());
     }
 
     public static LiteralArgumentBuilder<FabricClientCommandSource> makeInfoCommand() {
         LiteralArgumentBuilder<FabricClientCommandSource> node = ClientCommandManager.literal("info");
-        for (TaskInfo info : tasks) {
-            node = node.then(ClientCommandManager.literal(info.name).executes(ctx -> {
-                ctx.getSource().sendFeedback(info.description);
+        for (TaskFactory<?> factory : taskFactories) {
+            node = node.then(ClientCommandManager.literal(factory.getTaskName()).executes(ctx -> {
+                ctx.getSource().sendFeedback(factory.getDescription());
                 return 1;
             }));
         }
@@ -48,15 +44,15 @@ public class TaskQueue {
 
     public static LiteralArgumentBuilder<FabricClientCommandSource> makeAddCommand() {
         LiteralArgumentBuilder<FabricClientCommandSource> node = ClientCommandManager.literal("add");
-        for (TaskInfo info : tasks) {
+        for (TaskFactory<?> factory : taskFactories) {
             Command<FabricClientCommandSource> cmd = ctx -> {
-                Task task = info.makeTask.apply(ctx);
+                Task task = factory.makeTask(ctx);
                 TaskQueue.taskQueue.add(task);
                 ctx.getSource().sendFeedback(Text.literal(String.format("Added %s", task)));
                 return 1;
             };
             RequiredArgumentBuilder<FabricClientCommandSource, ?> argNode = null;
-            for (RequiredArgumentBuilder<FabricClientCommandSource, ?> arg : info.args) {
+            for (RequiredArgumentBuilder<FabricClientCommandSource, ?> arg : Lists.reverse(factory.getArgs())) {
                 if (argNode == null) {
                     argNode = arg.executes(cmd);
                 } else {
@@ -64,9 +60,9 @@ public class TaskQueue {
                 }
             }
             if (argNode == null) {
-                node = node.then(ClientCommandManager.literal(info.name).executes(cmd));
+                node = node.then(ClientCommandManager.literal(factory.getTaskName()).executes(cmd));
             } else {
-                node = node.then(ClientCommandManager.literal(info.name).then(argNode));
+                node = node.then(ClientCommandManager.literal(factory.getTaskName()).then(argNode));
             }
         }
         return node;
