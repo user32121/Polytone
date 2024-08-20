@@ -105,6 +105,19 @@ public class TaskQueue {
         return 1;
     }
 
+    public static int viewTasks(CommandContext<FabricClientCommandSource> ctx) {
+        ctx.getSource().sendFeedback(Text.literal(("-".repeat(20))));
+        ctx.getSource().sendFeedback(Text.literal(String.format("Listing tasks (%s unfinished and %s in queue)", curTask == null ? 0 : 1, taskQueue.size())));
+        if (curTask != null) {
+            ctx.getSource().sendFeedback(Text.literal(String.format(" | Current task: %s", curTask)));
+        }
+        for (Task t : taskQueue) {
+            ctx.getSource().sendFeedback(Text.literal(String.format(" | %s", t)));
+        }
+        ctx.getSource().sendFeedback(Text.literal(("-".repeat(20))));
+        return 1;
+    }
+
     public static void tick(MinecraftClient client) {
         if (!runningTasks) {
             return;

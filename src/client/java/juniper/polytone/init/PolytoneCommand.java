@@ -17,6 +17,7 @@ public class PolytoneCommand {
         makeCommand("tasks",
                 node -> node.then(ClientCommandManager.literal("start").executes(TaskQueue::startTasks)).then(ClientCommandManager.literal("stop").executes(TaskQueue::stopTasks))
                         .then(ClientCommandManager.literal("skip").executes(TaskQueue::skipTask)).then(ClientCommandManager.literal("clear").executes(TaskQueue::clearTasks))
+                        .then(ClientCommandManager.literal("view").executes(TaskQueue::viewTasks))
                         .then(TaskQueue.makeInfoCommand()).then(TaskQueue.makeAddCommand()));
     }
 

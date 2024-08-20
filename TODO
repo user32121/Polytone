@@ -1,5 +1,4 @@
-navigation/pathfinding
 flight
-rotate task speed
-/task view
 unbounded navigation (except by render distance) (and use chunk lazy loading)
+multithreaded pathfinding
+get as close to pathfinding target as possible

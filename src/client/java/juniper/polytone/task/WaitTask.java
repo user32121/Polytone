@@ -2,6 +2,7 @@ package juniper.polytone.task;
 
 import java.util.List;
 
+import com.google.common.base.MoreObjects;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -26,6 +27,11 @@ public class WaitTask implements Task {
     public boolean tick(MinecraftClient client) {
         --ticksLeft;
         return ticksLeft <= 0;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("ticks", ticksLeft).toString();
     }
 
     public static class WaitTaskFactory implements TaskFactory<WaitTask> {

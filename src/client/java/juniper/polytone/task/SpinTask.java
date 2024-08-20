@@ -2,6 +2,7 @@ package juniper.polytone.task;
 
 import java.util.List;
 
+import com.google.common.base.MoreObjects;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -32,6 +33,11 @@ public class SpinTask implements Task {
         rotation -= yaw2 - yaw;
         //finish when rotation changes sign
         return move != MathHelper.sign(rotation);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("degrees", rotation).toString();
     }
 
     public static class SpinTaskFactory implements TaskFactory<SpinTask> {

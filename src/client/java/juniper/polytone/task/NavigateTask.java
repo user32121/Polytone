@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -138,6 +139,11 @@ public class NavigateTask implements Task {
             path.removeFirst();
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("target", target.toShortString()).toString();
     }
 
     public static class NavigateTaskFactory implements TaskFactory<NavigateTask> {
