@@ -2,3 +2,4 @@ navigation/pathfinding
 flight
 rotate task speed
 /task view
+unbounded navigation (except by render distance) (and use chunk lazy loading)

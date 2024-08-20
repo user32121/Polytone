@@ -1,6 +1,7 @@
 package juniper.polytone.task;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -9,7 +10,6 @@ import com.google.common.collect.Lists;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
-import juniper.polytone.Polytone;
 import juniper.polytone.task.NavigateTask.Tile.TILE_TYPE;
 import juniper.polytone.task.steps.Step;
 import juniper.polytone.task.steps.TempStep;
@@ -22,6 +22,7 @@ import net.minecraft.command.argument.PosArgument;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3i;
@@ -34,17 +35,17 @@ public class NavigateTask implements Task {
     }
 
     private BlockPos target;
-    private List<Tile> path;
+    private List<Pair<Vec3i, Tile>> path;
 
     public static class Tile {
         enum TILE_TYPE {
             UNKNOWN, EMPTY, FLOOR, OBSTACLE,
         }
 
-        TILE_TYPE type = TILE_TYPE.UNKNOWN;
-        int cost = Integer.MAX_VALUE;
-        Vec3i travelFrom = null;
-        Step travelUsing = null;
+        public TILE_TYPE type = TILE_TYPE.UNKNOWN;
+        public int cost = Integer.MAX_VALUE;
+        public Vec3i travelFrom = null;
+        public Step travelUsing = null;
 
         public Tile(TILE_TYPE type) {
             this.type = type;
@@ -58,7 +59,6 @@ public class NavigateTask implements Task {
     @Override
     public void prepare(MinecraftClient client) {
         //get search bounds
-        //TODO bound search by render distance (and lazily load chunks)
         BlockPos start = client.player.getBlockPos();
         BlockPos min = BlockPos.min(start, target);
         BlockPos max = BlockPos.max(start, target);
@@ -107,10 +107,10 @@ public class NavigateTask implements Task {
         }
         //extract path
         Vec3i pos = target;
-        path = new ArrayList<>();
+        path = new LinkedList<>();
         while (!pos.equals(start)) {
             Tile t = ArrayUtil.get(grid, pos.subtract(min));
-            path.add(t);
+            path.add(new Pair<>(pos, t));
             pos = t.travelFrom;
             if (pos == null) {
                 client.player.sendMessage(Text.literal(String.format("Unable to reach %s", target)));
@@ -123,9 +123,15 @@ public class NavigateTask implements Task {
 
     @Override
     public boolean tick(MinecraftClient client) {
-        // TODO Auto-generated method stub
-        Polytone.LOGGER.info("path: {}", path);
-        return true;
+        if (path == null || path.size() == 0) {
+            return true;
+        }
+        Pair<Vec3i, Tile> step = path.getFirst();
+        boolean done = step.getRight().travelUsing.tick(client, step.getLeft());
+        if (done) {
+            path.removeFirst();
+        }
+        return false;
     }
 
     public static class NavigateTaskFactory implements TaskFactory<NavigateTask> {
