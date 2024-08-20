@@ -12,7 +12,7 @@ import com.mojang.brigadier.context.CommandContext;
 
 import juniper.polytone.task.NavigateTask.Tile.TILE_TYPE;
 import juniper.polytone.task.steps.Step;
-import juniper.polytone.task.steps.TempStep;
+import juniper.polytone.task.steps.TeleportStep;
 import juniper.polytone.util.ArrayUtil;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -31,14 +31,19 @@ public class NavigateTask implements Task {
     private static final int HEURISTIC_COST = 10;
     private static List<Step> STEPS = new ArrayList<>();
     static {
-        STEPS.add(new TempStep());
+        for (int y = -1; y <= 1; ++y) {
+            STEPS.add(new TeleportStep(new Vec3i(1, y, 0)));
+            STEPS.add(new TeleportStep(new Vec3i(-1, y, 0)));
+            STEPS.add(new TeleportStep(new Vec3i(0, y, 1)));
+            STEPS.add(new TeleportStep(new Vec3i(0, y, -1)));
+        }
     }
 
     private BlockPos target;
     private List<Pair<Vec3i, Tile>> path;
 
     public static class Tile {
-        enum TILE_TYPE {
+        public enum TILE_TYPE {
             UNKNOWN, EMPTY, FLOOR, OBSTACLE,
         }
 
@@ -70,7 +75,7 @@ public class NavigateTask implements Task {
         Tile[][][] grid = new Tile[max.getX() - min.getX() + 1][max.getY() - min.getY() + 1][max.getZ() - min.getZ() + 1];
         for (BlockPos pos : BlockPos.iterate(min, max)) {
             TILE_TYPE tt = TILE_TYPE.OBSTACLE;
-            if (client.world.isAir(pos)) {
+            if (client.world.getBlockState(pos).getCollisionShape(client.world, pos).isEmpty()) {
                 tt = TILE_TYPE.EMPTY;
             } else if (client.world.isTopSolid(pos, client.player)) {
                 tt = TILE_TYPE.FLOOR;
@@ -78,9 +83,10 @@ public class NavigateTask implements Task {
             ArrayUtil.set(grid, pos.subtract(min), new Tile(tt));
         }
         //run pathfinding
+        final BlockPos minCopy = min;
         Queue<Vec3i> toProcess = new PriorityQueue<>((v1, v2) -> {
-            int cost1 = ArrayUtil.get(grid, v1).cost;
-            int cost2 = ArrayUtil.get(grid, v2).cost;
+            int cost1 = ArrayUtil.get(grid, v1.subtract(minCopy)).cost;
+            int cost2 = ArrayUtil.get(grid, v2.subtract(minCopy)).cost;
             int heuristic1 = HEURISTIC_COST * v1.getManhattanDistance(target);
             int heuristic2 = HEURISTIC_COST * v2.getManhattanDistance(target);
             return (cost1 + heuristic1) - (cost2 + heuristic2);
@@ -92,7 +98,7 @@ public class NavigateTask implements Task {
             Vec3i pos = toProcess.remove();
             for (Step step : STEPS) {
                 Vec3i newPos = step.getNewPos(grid, min, pos);
-                if (newPos == null) {
+                if (newPos == null || !ArrayUtil.inBounds(grid, newPos.subtract(min))) {
                     continue;
                 }
                 int newCost = ArrayUtil.get(grid, pos.subtract(min)).cost + step.getCost();
