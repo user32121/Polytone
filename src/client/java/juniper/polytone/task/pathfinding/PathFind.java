@@ -64,7 +64,7 @@ public class PathFind extends Thread {
     public void run() {
         try {
             long blocksExplored = 0;
-            long lastChecked = System.currentTimeMillis();
+            long lastNotify = System.currentTimeMillis();
             Queue<Vec3i> toProcess = new PriorityQueue<>((v1, v2) -> {
                 int cost1;
                 int cost2;
@@ -82,9 +82,10 @@ public class PathFind extends Thread {
             grid.getTile(start).cost = 0;
             grid.getTile(start).travelFrom = start;
             while (toProcess.size() > 0 && grid.getTile(target).travelFrom == null) {
-                if (System.currentTimeMillis() - lastChecked >= 5000) {
+                long now = System.currentTimeMillis();
+                if (now - lastNotify >= 5000) {
                     feedback.add(Text.literal(String.format("pathfinding (%s blocks explored) ...", blocksExplored)));
-                    lastChecked = System.currentTimeMillis();
+                    lastNotify = now;
                 }
                 Vec3i pos = toProcess.remove();
                 ++blocksExplored;
@@ -120,6 +121,9 @@ public class PathFind extends Thread {
             feedback.add(Text.literal(String.format("Found a path of length %s (%s blocks explored)", path.size(), blocksExplored)));
         } catch (InterruptedException e) {
             feedback.add(Text.literal(String.format("An exception occurred: %s", e)).formatted(Formatting.RED));
+        } catch (Exception e) {
+            feedback.add(Text.literal(String.format("An exception occurred: %s", e)).formatted(Formatting.RED));
+            throw e;
         }
     }
 }

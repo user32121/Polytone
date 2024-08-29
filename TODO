@@ -1,4 +1,3 @@
 flight
-unbounded navigation (except by render distance) (and use chunk lazy loading)
-multithreaded pathfinding
 get as close to pathfinding target as possible
+pathfinding notify interval
