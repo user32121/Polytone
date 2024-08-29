@@ -1,4 +1,4 @@
-package juniper.polytone.task.pathfinding;
+package juniper.polytone.pathfinding;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -10,8 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.google.common.collect.Lists;
 
-import juniper.polytone.task.pathfinding.steps.Step;
-import juniper.polytone.task.pathfinding.steps.TeleportStep;
+import juniper.polytone.pathfinding.steps.Step;
+import juniper.polytone.pathfinding.steps.TeleportStep;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;

@@ -1,6 +1,6 @@
-package juniper.polytone.task.pathfinding.steps;
+package juniper.polytone.pathfinding.steps;
 
-import juniper.polytone.task.pathfinding.GridView;
+import juniper.polytone.pathfinding.GridView;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Vec3i;
 

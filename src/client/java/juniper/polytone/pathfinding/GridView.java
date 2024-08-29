@@ -1,4 +1,4 @@
-package juniper.polytone.task.pathfinding;
+package juniper.polytone.pathfinding;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,8 +6,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import juniper.polytone.task.pathfinding.PathFind.Tile;
-import juniper.polytone.task.pathfinding.PathFind.Tile.TILE_TYPE;
+import juniper.polytone.pathfinding.PathFind.Tile;
+import juniper.polytone.pathfinding.PathFind.Tile.TILE_TYPE;
 import juniper.polytone.util.ArrayUtil;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Pair;

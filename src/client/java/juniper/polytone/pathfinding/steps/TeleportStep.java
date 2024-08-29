@@ -1,7 +1,7 @@
-package juniper.polytone.task.pathfinding.steps;
+package juniper.polytone.pathfinding.steps;
 
-import juniper.polytone.task.pathfinding.GridView;
-import juniper.polytone.task.pathfinding.PathFind.Tile.TILE_TYPE;
+import juniper.polytone.pathfinding.GridView;
+import juniper.polytone.pathfinding.PathFind.Tile.TILE_TYPE;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;

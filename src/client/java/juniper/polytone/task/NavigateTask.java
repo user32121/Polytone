@@ -6,9 +6,9 @@ import com.google.common.base.MoreObjects;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
-import juniper.polytone.task.pathfinding.GridView;
-import juniper.polytone.task.pathfinding.PathFind;
-import juniper.polytone.task.pathfinding.PathFind.Tile;
+import juniper.polytone.pathfinding.GridView;
+import juniper.polytone.pathfinding.PathFind;
+import juniper.polytone.pathfinding.PathFind.Tile;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
