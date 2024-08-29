@@ -7,6 +7,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import juniper.polytone.Polytone;
 import juniper.polytone.command.RaycastTarget;
 import juniper.polytone.command.TaskQueue;
+import juniper.polytone.pathfinding.PathFind;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -19,6 +20,7 @@ public class PolytoneCommand {
                         .then(ClientCommandManager.literal("skip").executes(TaskQueue::skipTask)).then(ClientCommandManager.literal("clear").executes(TaskQueue::clearTasks))
                         .then(ClientCommandManager.literal("view").executes(TaskQueue::viewTasks))
                         .then(TaskQueue.makeInfoCommand()).then(TaskQueue.makeAddCommand()));
+        makeCommand("pathfinding", node -> node.then(ClientCommandManager.literal("notify_interval").then(PathFind.INTERVAL_ARG.executes(PathFind::setNotifyInterval))));
     }
 
     private static void makeCommand(String command, Function<LiteralArgumentBuilder<FabricClientCommandSource>, LiteralArgumentBuilder<FabricClientCommandSource>> buildCommand) {

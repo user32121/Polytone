@@ -9,9 +9,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.google.common.collect.Lists;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 
 import juniper.polytone.pathfinding.steps.Step;
 import juniper.polytone.pathfinding.steps.TeleportStep;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
@@ -21,8 +26,11 @@ import net.minecraft.util.math.Vec3i;
  * Runs pathfinding in a separate threads
  */
 public class PathFind extends Thread {
+    public static final RequiredArgumentBuilder<FabricClientCommandSource, Integer> INTERVAL_ARG = ClientCommandManager.argument("seconds", IntegerArgumentType.integer(1));
+
     private static final int HEURISTIC_ESTIMATED_COST = 10;
-    private static List<Step> STEPS = new ArrayList<>();
+    private static final List<Step> STEPS = new ArrayList<>();
+    private static int notifyInterval = 5000;
     static {
         for (int y = -1; y <= 1; ++y) {
             STEPS.add(new TeleportStep(new Vec3i(1, y, 0)));
@@ -45,6 +53,11 @@ public class PathFind extends Thread {
         public Tile(TILE_TYPE type) {
             this.type = type;
         }
+    }
+
+    public static int setNotifyInterval(CommandContext<FabricClientCommandSource> ctx) {
+        notifyInterval = IntegerArgumentType.getInteger(ctx, INTERVAL_ARG.getName()) * 1000;
+        return 1;
     }
 
     public List<Pair<Vec3i, Tile>> path;
@@ -83,7 +96,7 @@ public class PathFind extends Thread {
             grid.getTile(start).travelFrom = start;
             while (toProcess.size() > 0 && grid.getTile(target).travelFrom == null) {
                 long now = System.currentTimeMillis();
-                if (now - lastNotify >= 5000) {
+                if (now - lastNotify >= notifyInterval) {
                     feedback.add(Text.literal(String.format("pathfinding (%s blocks explored) ...", blocksExplored)));
                     lastNotify = now;
                 }
