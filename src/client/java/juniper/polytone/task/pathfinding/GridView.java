@@ -32,6 +32,10 @@ public class GridView {
     }
 
     public Tile getTile(Vec3i pos) throws InterruptedException {
+        if (pos.getY() < minY || pos.getY() > maxY) {
+            return new Tile(TILE_TYPE.OUT_OF_BOUNDS);
+        }
+
         ChunkPos cp = new ChunkPos(new BlockPos(pos));
         Pair<CountDownLatch, Tile[][][]> chunk = chunks.get(cp);
 
@@ -49,29 +53,31 @@ public class GridView {
      * Runs processing that needs to be done on the main (client) thread
      */
     public void processMainThread(MinecraftClient client) {
-        while (!toProcess.isEmpty()) {
-            ChunkPos cp = toProcess.poll();
-            Vec3i size = getMaxPos(cp).subtract(getMinPos(cp)).add(1, 1, 1);
-            Tile[][][] grid = new Tile[size.getX()][size.getY()][size.getZ()];
-            if (client.world.getChunk(cp.x, cp.z) instanceof EmptyChunk) {
-                for (BlockPos pos : BlockPos.iterate(getMinPos(cp), getMaxPos(cp))) {
-                    ArrayUtil.set(grid, pos.subtract(getMinPos(cp)), new Tile(TILE_TYPE.OUT_OF_BOUNDS));
-                }
-            } else {
-                for (BlockPos pos : BlockPos.iterate(getMinPos(cp), getMaxPos(cp))) {
-                    TILE_TYPE tt = TILE_TYPE.OBSTACLE;
-                    if (client.world.getBlockState(pos).getCollisionShape(client.world, pos).isEmpty()) {
-                        tt = TILE_TYPE.EMPTY;
-                    } else if (client.world.isTopSolid(pos, client.player)) {
-                        tt = TILE_TYPE.FLOOR;
-                    }
-                    ArrayUtil.set(grid, pos.subtract(getMinPos(cp)), new Tile(tt));
-                }
-            }
-
-            chunks.get(cp).setRight(grid);
-            chunks.get(cp).getLeft().countDown();
+        ChunkPos cp = toProcess.poll();
+        if (cp == null) {
+            return;
         }
+        Vec3i size = getMaxPos(cp).subtract(getMinPos(cp)).add(1, 1, 1);
+        Tile[][][] grid = new Tile[size.getX()][size.getY()][size.getZ()];
+        if (client.world.getChunk(cp.x, cp.z) instanceof EmptyChunk) {
+            for (BlockPos pos : BlockPos.iterate(getMinPos(cp), getMaxPos(cp))) {
+                ArrayUtil.set(grid, pos.subtract(getMinPos(cp)), new Tile(TILE_TYPE.OUT_OF_BOUNDS));
+            }
+        } else {
+            for (BlockPos pos : BlockPos.iterate(getMinPos(cp), getMaxPos(cp))) {
+                TILE_TYPE tt = TILE_TYPE.OBSTACLE;
+                if (client.world.getBlockState(pos).getCollisionShape(client.world, pos).isEmpty()) {
+                    tt = TILE_TYPE.EMPTY;
+                } else if (client.world.isTopSolid(pos, client.player)) {
+                    tt = TILE_TYPE.FLOOR;
+                }
+                ArrayUtil.set(grid, pos.subtract(getMinPos(cp)), new Tile(tt));
+            }
+        }
+
+        chunks.get(cp).setRight(grid);
+        chunks.get(cp).getLeft().countDown();
+
     }
 
     /**
