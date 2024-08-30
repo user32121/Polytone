@@ -26,7 +26,7 @@ import net.minecraft.util.math.Vec3i;
  * Runs pathfinding in a separate threads
  */
 public class PathFind extends Thread {
-    public static final RequiredArgumentBuilder<FabricClientCommandSource, Integer> INTERVAL_ARG = ClientCommandManager.argument("seconds", IntegerArgumentType.integer(1));
+    public static final RequiredArgumentBuilder<FabricClientCommandSource, ?> INTERVAL_ARG = ClientCommandManager.argument("seconds", IntegerArgumentType.integer(1));
 
     private static final int HEURISTIC_ESTIMATED_COST = 10;
     private static final List<Step> STEPS = new ArrayList<>();
@@ -66,11 +66,13 @@ public class PathFind extends Thread {
     private Vec3i start;
     private Vec3i target;
     private GridView grid;
+    private boolean fuzzy;
 
-    public PathFind(Vec3i start, Vec3i target, GridView grid) {
+    public PathFind(Vec3i start, Vec3i target, GridView grid, boolean fuzzy) {
         this.start = start;
         this.target = target;
         this.grid = grid;
+        this.fuzzy = fuzzy;
     }
 
     @Override
@@ -91,6 +93,7 @@ public class PathFind extends Thread {
                 int heuristic2 = HEURISTIC_ESTIMATED_COST * v2.getManhattanDistance(target);
                 return (cost1 + heuristic1) - (cost2 + heuristic2);
             });
+
             toProcess.add(start);
             grid.getTile(start).cost = 0;
             grid.getTile(start).travelFrom = start;
@@ -117,6 +120,12 @@ public class PathFind extends Thread {
                     }
                 }
             }
+
+            //move target if fuzzy
+            if (fuzzy && grid.getTile(target).travelFrom == null) {
+                target = grid.getClosestReachablePos(target);
+            }
+
             //extract path
             Vec3i pos = target;
             path = new LinkedList<>();
@@ -131,7 +140,8 @@ public class PathFind extends Thread {
                 }
             }
             path = Lists.reverse(path);
-            feedback.add(Text.literal(String.format("Found a path of length %s (%s blocks explored)", path.size(), blocksExplored)));
+
+            feedback.add(Text.literal(String.format("Found a path of length %s to %s (%s blocks explored)", path.size(), target, blocksExplored)));
         } catch (InterruptedException e) {
             feedback.add(Text.literal(String.format("An exception occurred: %s", e)).formatted(Formatting.RED));
         } catch (Exception e) {

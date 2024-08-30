@@ -3,6 +3,7 @@ package juniper.polytone.task;
 import java.util.List;
 
 import com.google.common.base.MoreObjects;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
@@ -23,17 +24,19 @@ import net.minecraft.util.math.Vec3i;
 
 public class NavigateTask implements Task {
     private BlockPos target;
+    private boolean fuzzy;
     private GridView grid;
     private PathFind path;
 
-    public NavigateTask(BlockPos target) {
+    public NavigateTask(BlockPos target, boolean fuzzy) {
         this.target = target;
+        this.fuzzy = fuzzy;
     }
 
     @Override
     public void prepare(MinecraftClient client) {
         grid = new GridView(client.world);
-        path = new PathFind(client.player.getBlockPos(), target, grid);
+        path = new PathFind(client.player.getBlockPos(), target, grid, fuzzy);
         path.start();
     }
 
@@ -71,6 +74,7 @@ public class NavigateTask implements Task {
 
     public static class NavigateTaskFactory implements TaskFactory<NavigateTask> {
         public static final RequiredArgumentBuilder<FabricClientCommandSource, ?> POS_ARG = ClientCommandManager.argument("position", BlockPosArgumentType.blockPos());
+        public static final RequiredArgumentBuilder<FabricClientCommandSource, ?> FUZZY_ARG = ClientCommandManager.argument("fuzzy", BoolArgumentType.bool());
 
         @Override
         public String getTaskName() {
@@ -79,12 +83,12 @@ public class NavigateTask implements Task {
 
         @Override
         public Text getDescription() {
-            return Text.literal("Pathfind to a location");
+            return Text.literal("Pathfind to a location, or to the closest possible spot if fuzzy is enabled");
         }
 
         @Override
         public List<RequiredArgumentBuilder<FabricClientCommandSource, ?>> getArgs() {
-            return List.of(POS_ARG);
+            return List.of(POS_ARG, FUZZY_ARG);
         }
 
         @Override
@@ -93,7 +97,8 @@ public class NavigateTask implements Task {
             ServerCommandSource scs = new ServerCommandSource(CommandOutput.DUMMY, fccs.getPosition(), fccs.getRotation(), null, 0, "client_command_source_wrapper",
                     Text.literal("Client Command Source Wrapper"), null, fccs.getEntity());
             BlockPos pos = ctx.getArgument(POS_ARG.getName(), PosArgument.class).toAbsoluteBlockPos(scs);
-            return new NavigateTask(pos);
+            boolean fuzzy = BoolArgumentType.getBool(ctx, FUZZY_ARG.getName());
+            return new NavigateTask(pos, fuzzy);
         }
     }
 }

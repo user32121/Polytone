@@ -2,6 +2,7 @@ package juniper.polytone.pathfinding;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -47,6 +48,33 @@ public class GridView {
         chunk.getLeft().await();
 
         return ArrayUtil.get(chunk.getRight(), pos.subtract(getMinPos(cp)));
+    }
+
+    public Vec3i getClosestReachablePos(Vec3i target) {
+        Vec3i minPos = null;
+        double minDistSqr = Double.POSITIVE_INFINITY;
+        for (Entry<ChunkPos, Pair<CountDownLatch, Tile[][][]>> e : chunks.entrySet()) {
+            if (e.getValue().getLeft().getCount() != 0) {
+                continue;
+            }
+            Tile[][][] chunk = e.getValue().getRight();
+            for (int x = 0; x < chunk.length; ++x) {
+                for (int y = 0; y < chunk[x].length; ++y) {
+                    for (int z = 0; z < chunk[x][y].length; ++z) {
+                        Tile t = chunk[x][y][z];
+                        double distSqr = target.getSquaredDistance(x, y, z);
+                        if (distSqr < minDistSqr && t.cost < Integer.MAX_VALUE) {
+                            minDistSqr = distSqr;
+                            minPos = e.getKey().getBlockPos(x, y + minY, z);
+                        }
+                    }
+                }
+            }
+        }
+        if (minPos == null) {
+            throw new RuntimeException("No tiles could be found");
+        }
+        return minPos;
     }
 
     /**
