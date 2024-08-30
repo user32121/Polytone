@@ -30,7 +30,7 @@ public class PathFind extends Thread {
 
     private static final int HEURISTIC_ESTIMATED_COST = 10;
     private static final List<Step> STEPS = new ArrayList<>();
-    private static int notifyInterval = 5000;
+    private static int notifyInterval = 5;
     static {
         for (int y = -1; y <= 1; ++y) {
             STEPS.add(new TeleportStep(new Vec3i(1, y, 0)));
@@ -56,7 +56,13 @@ public class PathFind extends Thread {
     }
 
     public static int setNotifyInterval(CommandContext<FabricClientCommandSource> ctx) {
-        notifyInterval = IntegerArgumentType.getInteger(ctx, INTERVAL_ARG.getName()) * 1000;
+        notifyInterval = IntegerArgumentType.getInteger(ctx, INTERVAL_ARG.getName());
+        ctx.getSource().sendFeedback(Text.literal(String.format("Set pathfinding notify interval to %s seconds", notifyInterval)));
+        return 1;
+    }
+
+    public static int getNotifyInterval(CommandContext<FabricClientCommandSource> ctx) {
+        ctx.getSource().sendFeedback(Text.literal(String.format("Pathfinding notify interval is set to %s seconds", notifyInterval)));
         return 1;
     }
 
@@ -99,7 +105,7 @@ public class PathFind extends Thread {
             grid.getTile(start).travelFrom = start;
             while (toProcess.size() > 0 && grid.getTile(target).travelFrom == null) {
                 long now = System.currentTimeMillis();
-                if (now - lastNotify >= notifyInterval) {
+                if (now - lastNotify >= notifyInterval * 1000) {
                     feedback.add(Text.literal(String.format("pathfinding (%s blocks explored) ...", blocksExplored)));
                     lastNotify = now;
                 }
