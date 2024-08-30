@@ -62,10 +62,11 @@ public class GridView {
                 for (int y = 0; y < chunk[x].length; ++y) {
                     for (int z = 0; z < chunk[x][y].length; ++z) {
                         Tile t = chunk[x][y][z];
-                        double distSqr = target.getSquaredDistance(x, y, z);
+                        BlockPos pos = getMinPos(e.getKey()).add(x, y, z);
+                        double distSqr = target.getSquaredDistance(pos);
                         if (distSqr < minDistSqr && t.cost < Integer.MAX_VALUE) {
                             minDistSqr = distSqr;
-                            minPos = e.getKey().getBlockPos(x, y + minY, z);
+                            minPos = pos;
                         }
                     }
                 }
@@ -105,7 +106,6 @@ public class GridView {
 
         chunks.get(cp).setRight(grid);
         chunks.get(cp).getLeft().countDown();
-
     }
 
     /**
@@ -124,5 +124,13 @@ public class GridView {
 
     public boolean hasTileType(Vec3i pos, TILE_TYPE type) throws InterruptedException {
         return getTile(pos).type.equals(type);
+    }
+
+    /**
+     * Clear all tile data. Mainly for memory reasons.
+     */
+    public void clear() {
+        toProcess.clear();
+        chunks.clear();
     }
 }

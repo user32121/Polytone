@@ -1,3 +1,2 @@
 flight
 /pathfinding notify_interval
-nullify grid after pathfinding to free up memory

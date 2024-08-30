@@ -147,6 +147,9 @@ public class PathFind extends Thread {
         } catch (Exception e) {
             feedback.add(Text.literal(String.format("An exception occurred: %s", e)).formatted(Formatting.RED));
             throw e;
+        } finally {
+            //free up memory cause this thing gets really large
+            grid.clear();
         }
     }
 }
