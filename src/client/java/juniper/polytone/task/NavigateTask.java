@@ -20,6 +20,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3i;
 
 public class NavigateTask implements Task {
@@ -35,7 +36,7 @@ public class NavigateTask implements Task {
 
     @Override
     public void prepare(MinecraftClient client) {
-        grid = new GridView(client.world);
+        grid = new GridView(client.world, client.player.getChunkPos(), new ChunkPos(target));
         path = new PathFind(client.player.getBlockPos(), target, grid, fuzzy);
         path.start();
     }

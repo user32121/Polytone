@@ -7,6 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import juniper.polytone.Polytone;
 import juniper.polytone.pathfinding.PathFind.Tile;
 import juniper.polytone.pathfinding.PathFind.Tile.TILE_TYPE;
 import juniper.polytone.util.ArrayUtil;
@@ -14,6 +15,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.EmptyChunk;
@@ -23,13 +25,18 @@ import net.minecraft.world.chunk.EmptyChunk;
  */
 public class GridView {
     private final int minY, maxY; //inclusive
+    private final ChunkPos start;
+    private final float targetAngle;
 
     private Map<ChunkPos, Pair<CountDownLatch, Tile[][][]>> chunks = new HashMap<>();
     private BlockingQueue<ChunkPos> toProcess = new LinkedBlockingQueue<>();
 
-    public GridView(World world) {
+    public GridView(World world, ChunkPos start, ChunkPos target) {
         this.minY = world.getBottomY();
         this.maxY = world.getTopY() - 1;
+        this.start = start;
+        this.targetAngle = (float) Math.toDegrees(Math.atan2(target.z - start.z, target.x - start.x));
+        Polytone.LOGGER.info("{} -> {}: {}", start, target, targetAngle);
     }
 
     public Tile getTile(Vec3i pos) throws InterruptedException {
@@ -88,7 +95,7 @@ public class GridView {
         }
         Vec3i size = getMaxPos(cp).subtract(getMinPos(cp)).add(1, 1, 1);
         Tile[][][] grid = new Tile[size.getX()][size.getY()][size.getZ()];
-        if (client.world.getChunk(cp.x, cp.z) instanceof EmptyChunk) {
+        if ((!radiusCheck(cp) && !angleCheck(cp)) || client.world.getChunk(cp.x, cp.z) instanceof EmptyChunk) {
             for (BlockPos pos : BlockPos.iterate(getMinPos(cp), getMaxPos(cp))) {
                 ArrayUtil.set(grid, pos.subtract(getMinPos(cp)), new Tile(TILE_TYPE.OUT_OF_BOUNDS));
             }
@@ -132,5 +139,18 @@ public class GridView {
     public void clear() {
         toProcess.clear();
         chunks.clear();
+    }
+
+    private boolean angleCheck(ChunkPos cp) {
+        float angle = (float) Math.toDegrees(Math.atan2(cp.z - start.z, cp.x - start.x));
+        float angleBetween = MathHelper.angleBetween(targetAngle, angle);
+        float searchAngle = PathFind.getSearchAngle() / 2;
+        Polytone.LOGGER.info("{} -> {} -> {} (<= {} ({}))", cp, angle, angleBetween, searchAngle, angleBetween <= searchAngle);
+        return angleBetween <= searchAngle;
+    }
+
+    private boolean radiusCheck(ChunkPos cp) {
+        float sr = PathFind.getSearchRadius();
+        return start.getSquaredDistance(cp) <= sr * sr;
     }
 }
