@@ -2,7 +2,12 @@
   "required": true,
   "package": "juniper.polytone.mixin",
   "compatibilityLevel": "JAVA_21",
-  "client": ["AnimalEntityAccessor", "FeedingMixin", "RaycastPriorityMixin"],
+  "client": [
+    "AnimalEntityAccessor",
+    "FeedingMixin",
+    "RaycastPriorityMixin",
+    "DebugRendererMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

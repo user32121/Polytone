@@ -7,7 +7,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import juniper.polytone.Polytone;
 import juniper.polytone.pathfinding.PathFind.Tile;
 import juniper.polytone.pathfinding.PathFind.Tile.TILE_TYPE;
 import juniper.polytone.util.ArrayUtil;
@@ -36,7 +35,6 @@ public class GridView {
         this.maxY = world.getTopY() - 1;
         this.start = start;
         this.targetAngle = (float) Math.toDegrees(Math.atan2(target.z - start.z, target.x - start.x));
-        Polytone.LOGGER.info("{} -> {}: {}", start, target, targetAngle);
     }
 
     public Tile getTile(Vec3i pos) throws InterruptedException {
@@ -145,7 +143,6 @@ public class GridView {
         float angle = (float) Math.toDegrees(Math.atan2(cp.z - start.z, cp.x - start.x));
         float angleBetween = MathHelper.angleBetween(targetAngle, angle);
         float searchAngle = PathFind.getSearchAngle() / 2;
-        Polytone.LOGGER.info("{} -> {} -> {} (<= {} ({}))", cp, angle, angleBetween, searchAngle, angleBetween <= searchAngle);
         return angleBetween <= searchAngle;
     }
 

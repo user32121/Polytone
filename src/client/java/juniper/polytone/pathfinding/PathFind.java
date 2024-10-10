@@ -9,6 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.google.common.collect.Lists;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -30,12 +31,14 @@ public class PathFind extends Thread {
     public static final RequiredArgumentBuilder<FabricClientCommandSource, ?> INTERVAL_ARG = ClientCommandManager.argument("seconds", IntegerArgumentType.integer(1));
     public static final RequiredArgumentBuilder<FabricClientCommandSource, ?> RADIUS_ARG = ClientCommandManager.argument("chunks", FloatArgumentType.floatArg(0));
     public static final RequiredArgumentBuilder<FabricClientCommandSource, ?> ANGLE_ARG = ClientCommandManager.argument("degrees", FloatArgumentType.floatArg(0));
+    public static final RequiredArgumentBuilder<FabricClientCommandSource, ?> ENABLED_ARG = ClientCommandManager.argument("enabled", BoolArgumentType.bool());
 
     private static final int HEURISTIC_ESTIMATED_COST = 10;
     private static final List<Step> STEPS = new ArrayList<>();
     private static int notifyInterval = 5;
     private static float searchRadius = 2;
     private static float searchAngle = 60;
+    private static boolean showPath = false;
     static {
         for (int y = -1; y <= 1; ++y) {
             STEPS.add(new TeleportStep(new Vec3i(1, y, 0)));
@@ -99,6 +102,21 @@ public class PathFind extends Thread {
 
     public static float getSearchAngle() {
         return searchAngle;
+    }
+
+    public static int setShowPath(CommandContext<FabricClientCommandSource> ctx) {
+        showPath = BoolArgumentType.getBool(ctx, ENABLED_ARG.getName());
+        ctx.getSource().sendFeedback(Text.literal(String.format("Set show path to %s", showPath)));
+        return 1;
+    }
+
+    public static int getShowPath(CommandContext<FabricClientCommandSource> ctx) {
+        ctx.getSource().sendFeedback(Text.literal(String.format("Show path is set to %s", showPath)));
+        return 1;
+    }
+
+    public static boolean getShowPath() {
+        return showPath;
     }
 
     public List<Pair<Vec3i, Tile>> path;

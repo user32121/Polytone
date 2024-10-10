@@ -22,7 +22,8 @@ public class PolytoneCommand {
         makeCommand("pathfinding",
                 node -> node.then(ClientCommandManager.literal("notify_interval").executes(PathFind::getNotifyInterval).then(PathFind.INTERVAL_ARG.executes(PathFind::setNotifyInterval)))
                         .then(ClientCommandManager.literal("search_radius").executes(PathFind::getSearchRadius).then(PathFind.RADIUS_ARG.executes(PathFind::setSearchRadius)))
-                        .then(ClientCommandManager.literal("search_angle").executes(PathFind::getSearchAngle).then(PathFind.ANGLE_ARG.executes(PathFind::setSearchAngle))));
+                        .then(ClientCommandManager.literal("search_angle").executes(PathFind::getSearchAngle).then(PathFind.ANGLE_ARG.executes(PathFind::setSearchAngle)))
+                        .then(ClientCommandManager.literal("show_path").executes(PathFind::getShowPath).then(PathFind.ENABLED_ARG.executes(PathFind::setShowPath))));
     }
 
     private static void makeCommand(String command, Function<LiteralArgumentBuilder<FabricClientCommandSource>, LiteralArgumentBuilder<FabricClientCommandSource>> buildCommand) {

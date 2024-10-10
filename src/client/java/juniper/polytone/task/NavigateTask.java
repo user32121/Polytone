@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 
+import juniper.polytone.mixinInterface.DebugRendererInterface;
 import juniper.polytone.pathfinding.GridView;
 import juniper.polytone.pathfinding.PathFind;
 import juniper.polytone.pathfinding.PathFind.Tile;
@@ -39,6 +40,7 @@ public class NavigateTask implements Task {
         grid = new GridView(client.world, client.player.getChunkPos(), new ChunkPos(target));
         path = new PathFind(client.player.getBlockPos(), target, grid, fuzzy);
         path.start();
+        ((DebugRendererInterface) (Object) client.debugRenderer).getPathFindDebugRenderer().addPath(path);
     }
 
     @Override
